@@ -4,8 +4,11 @@ import { useGetStationsQuery } from "../../slices/trainApiSlice";
 import { LinkContainer } from "react-router-bootstrap";
 
 const HeroSection = () => {
+
   //getting stations data from api
+  //console.log("🚀 ~ file: HeroSection.jsx:8 ~ HeroSection ~ data:", data)
   const { data, isLoading } = useGetStationsQuery();
+
 
   return (
     <section className="hero-section">
