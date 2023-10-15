@@ -8,7 +8,7 @@ const HeroSection = () => {
   const {data, isLoading} = useGetStationsQuery();
 
 
-  console.log("🚀 ~ file: HeroSection.jsx:8 ~ HeroSection ~ data:", data)
+  //console.log("🚀 ~ file: HeroSection.jsx:8 ~ HeroSection ~ data:", data)
 
 
   return (
