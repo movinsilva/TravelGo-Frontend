@@ -1,13 +1,14 @@
-import { describe, expect, it, render } from "vitest";
+import React from 'react'
 import TestRenderer from "react-test-renderer"; 
 import Header from "../components/Navbar/Header";
 import { MemoryRouter } from "react-router-dom";
+import {configure,shallow} from 'enzyme';
 import { Provider } from "react-redux"; // Import the Provider
 import store from "../store.js"; // Import your Redux store
 
-describe("Header.jsx", () => {
-    
 
+
+describe("Header.jsx", () => {
     it("Login and logout", () => {
         const tree = TestRenderer.create(
         /* Making the redux store available for all the components */
@@ -25,11 +26,11 @@ describe("Header.jsx", () => {
 
         expect(linkcontainer.children[1].type).toBe("a");
         expect(linkcontainer.children[1].props.href).toBe("/register");
-        console.log(linkcontainer)
+        //console.log(linkcontainer)
 
         
 })
-    it("renders Header navbar navigation components", () => {
+    it("Header navbar navigation components redirects to correct location", () => {
         const tree = TestRenderer.create(
         /* Making the redux store available for all the components */
           <Provider store={store}>   
@@ -42,7 +43,7 @@ describe("Header.jsx", () => {
         const navbarlinks = tree.children[0].children[0].children[2].children[0].children[0];
 
 
-        console.log(tree.children[0].children[0].children[2].children[0].children[0])
+        //console.log(tree.children[0].children[0].children[2].children[0].children[0])
         expect(navbarlinks.children[0].type).toBe("a");
         expect(navbarlinks.children[0].props.href).toBe("/");
 
@@ -59,7 +60,7 @@ describe("Header.jsx", () => {
         expect(navbarlinks.children[4].props.href).toBe("/ContactUs");
        
 
-        console.log(navbarlinks)
+        //console.log(navbarlinks)
         expect(tree).toMatchSnapshot(); // This can be used for snapshot testing
 
     })
@@ -114,5 +115,6 @@ describe("Header.jsx", () => {
     
     
   });
+  
 });
 
