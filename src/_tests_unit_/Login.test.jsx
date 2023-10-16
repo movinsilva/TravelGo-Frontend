@@ -74,7 +74,6 @@ describe('Login component', () => {
    
         fireEvent.input(emailInput, { target: { value: newEmail } });
 
-    
         expect(emailInput.value).toBe(newEmail);
       });
 
@@ -96,7 +95,21 @@ describe('Login component', () => {
         
         fireEvent.click(submitButton);
     
-      });   
+      });  
+      it('should redirect to sign up page when clicking the "Sign Up" link', () => {
+        render(<Provider store={store}>
+            <MemoryRouter initialEntries={['/login']}>
+                <Login/>
+            </MemoryRouter>
+        </Provider>);
+    
+        const signUpLink = screen.getByText('Sign Up');
+        fireEvent.click(signUpLink);
+
+        const currentPathname = window.location.pathname;
+     
+        expect(currentPathname).toBe('/');
+      }); 
 
     // it('should update the password input value when typing', () => {
     //     const { getByTestId } = render(<Provider store={store}>

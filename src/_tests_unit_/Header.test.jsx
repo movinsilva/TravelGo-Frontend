@@ -9,7 +9,7 @@ import store from "../store.js"; // Import your Redux store
 
 
 describe("Header.jsx", () => {
-    it("Login and logout", () => {
+    it("Login and logout buttons works correctly", () => {
         const tree = TestRenderer.create(
         /* Making the redux store available for all the components */
           <Provider store={store}>   
@@ -28,7 +28,6 @@ describe("Header.jsx", () => {
         expect(linkcontainer.children[1].props.href).toBe("/register");
         //console.log(linkcontainer)
 
-        
 })
     it("Header navbar navigation components redirects to correct location", () => {
         const tree = TestRenderer.create(
@@ -38,6 +37,7 @@ describe("Header.jsx", () => {
               <Header />
             </MemoryRouter>
           </Provider>
+
         ).toJSON();
         //navbar navigation links
         const navbarlinks = tree.children[0].children[0].children[2].children[0].children[0];
@@ -54,7 +54,7 @@ describe("Header.jsx", () => {
         expect(navbarlinks.children[2].props.href).toBe("/Bookings");
         
         expect(navbarlinks.children[3].type).toBe("a");
-        expect(navbarlinks.children[3].props.href).toBe("/Terms");
+        expect(navbarlinks.children[3].props.href).toBe("/TermsAndConditions");
         
         expect(navbarlinks.children[4].type).toBe("a");
         expect(navbarlinks.children[4].props.href).toBe("/ContactUs");

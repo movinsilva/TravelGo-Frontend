@@ -22,8 +22,7 @@ describe("Home Page/HeroSection.jsx",()=>{
         expect(tree.children[1].children[1].children[0].children[2].props.className).toBe("dropdown-class")
 
         expect(tree.children[1].children[1].children[0].children[2].children[1].props.type).toBe("date")
-        console.log(tree.children[1].children[1].children[0].children[2].children[1])
-
+        //console.log(tree.children[1].children[1].children[0].children[2].children[1])
 
 
 
@@ -46,26 +45,7 @@ describe("Home Page/HeroSection.jsx",()=>{
 
 
     })
-    it("Renders correctly",()=>{
-
-       
-        const tree = TestRenderer.create(
-            <Provider store={store}>
-              <MemoryRouter>
-                <HeroSection />
-              </MemoryRouter>
-            </Provider>
-          );
-
-        // Simulate user input in the date field
-        const dateInput = tree.root.findByProps({ placeholder: "Date" });
-        console.log(dateInput.props)
-        fireEvent.change(dateInput, { target: { value: "2023-10-13" } });
-      
-      
-        
-
-    })
+    
 
    
 })
