@@ -1,191 +1,284 @@
-import { Button, Form, Container, Row, Col } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
+import ScheduleCard from "./ScheduleCard";
+import { useGetStationsQuery } from "../../slices/trainApiSlice";
+import { useEffect, useState } from "react";
+import { useLocation , useNavigate } from "react-router-dom";
+import { useGetScheduleMutation } from "../../slices/trainApiSlice";
 import "./Schedule.scss";
-import { LinkContainer } from "react-router-bootstrap";
-import useCounter from "./useCounter";
 
-// eslint-disable-next-line react/prop-types
-const ClassDetails = ({seatClass,price,seatsCount,availableSeats,bookedSeats,}) => {
+const NewBooking = () => {
 
-  const { count, increment, decrement } = useCounter(); 
-  
+  const { data, isLoading } = useGetStationsQuery();
+  const location = useLocation();
+  const { state } = location;
+  const [schedule, { isLoading: isload }] = useGetScheduleMutation();
+  const [scheduleData, setScheduleData] = useState(null);
+
+  // Get the data from the query parameters
+  const { fromStation, toStation, date, fromStationName, toStationName , minDate } = state.searchData;
+
+  const [fromStationId, setFromStationId] = useState(fromStation);
+  const [toStationId, setToStationId] = useState(toStation);
+  const [fromStationNameAssign, setFromStationNameAssign] = useState(fromStationName);
+  const [toStationNameAssign, setToStationNameAssign] = useState(toStationName);
+  const [newDate, setNewDate] = useState(date);
+
+  // Get the day of the week from the date
+  const dateName = new Date(newDate);
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  const dayOfWeek = daysOfWeek[dateName.getDay()];
+
+  const handleDateChange = (e) => {
+    setNewDate(e.target.value);
+  };
+
+  const handleFromStation = (e) => {
+    const selectedValue = e.target.value;
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const stationId = selectedOption.getAttribute("data-station-id");
+    setFromStationId(stationId);
+    setFromStationNameAssign(selectedValue);
+  };
+
+  const handleToStation = (e) => {
+    const selectedValue = e.target.value;
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const stationId = selectedOption.getAttribute("data-station-id");
+    setToStationId(stationId);
+    setToStationNameAssign(selectedValue);
+  };
+
+  async function fetchScheduleData() {
+    try {
+      const result = await schedule({
+        sourceId: fromStationId,
+        destinationId: toStationId,
+        date: dayOfWeek,
+      }).unwrap();
+      setScheduleData(result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    fetchScheduleData();
+  }, []);
+
+  // console.log("scheduleData: " , scheduleData);
+
+  const navigate = useNavigate(); 
+
+  const handleButtonClicked = (data) => {
+    const trainData = {
+      data : data,
+      classes: scheduleData[0].classes,
+    };
+
+    console.log("train Data: ", trainData);
+    navigate("/booking", { state: { trainData } });
+  };
+
+  let trainNo,
+    trainName,
+    arrivalTime,
+    departureTime,
+    arrivalTimeAtDestination,
+    arrivalTimeAtSource,
+    defaultTotalSeats,
+    departureTimeAtSource,
+    departureTimeAtDestination,
+    destinationStationID,
+    frequencyName,
+    sourceStationID,
+    trainEndStation,
+    trainStartStaion,
+    classNames = [],
+    trainType,
+    loads = [];
+
+  if (scheduleData && scheduleData.length > 0) {
+    const firstItem = scheduleData[0];
+    trainNo = firstItem.TrainNo;
+    trainName = firstItem.TrainName;
+    arrivalTime = firstItem.ArrivalTime;
+    departureTime = firstItem.DepartureTime;
+    arrivalTimeAtDestination = firstItem.ArrivalTimeAtDestination;
+    arrivalTimeAtSource = firstItem.ArrivalTimeAtSource;
+    defaultTotalSeats = firstItem.DefaultTotalSeats;
+    departureTimeAtSource = firstItem.DepartureTimeAtSource;
+    departureTimeAtDestination = firstItem.DepartureTimeAtDestination;
+    frequencyName = firstItem.FrequencyName;
+    trainType = firstItem.TrainType;
+    loads = firstItem.load;
+    trainEndStation = firstItem.TrainEndStation;
+    trainStartStaion = firstItem.TrainStartStation;
+
+    // Setting class names
+    if (firstItem.classes && firstItem.classes.length > 0) {
+      firstItem.classes.forEach((classItem) => {
+        if (classItem.Class) {
+          let classAbbreviation = classItem.Class;
+
+          if (classAbbreviation.includes("First")) {
+            classAbbreviation = "1st";
+          } else if (classAbbreviation.includes("Second")) {
+            classAbbreviation = "2nd";
+          } else if (classAbbreviation.includes("Third")) {
+            classAbbreviation = "3rd";
+          }
+
+          classNames.push(classAbbreviation);
+        }
+      });
+    } else {
+      console.log("No schedule data available.");
+    }
+  }
+
+  const trainData = [
+    {
+      trainName: trainName,
+      trainType: trainType,
+      trainNo: trainNo,
+      frequencyName: frequencyName,
+      classes: classNames.join(" , "),
+      schedule: [
+        {
+          name: trainStartStaion,
+          arrival: arrivalTime,
+          departure: departureTime,
+        },
+        { name: fromStationNameAssign, arrival: arrivalTimeAtSource, departure: departureTimeAtSource },
+        {
+          name: toStationNameAssign,
+          arrival: arrivalTimeAtDestination,
+          departure: departureTimeAtDestination,
+        },
+        {
+          name: trainEndStation,
+          arrival: "enter time",
+          departure: "",
+        },
+      ],
+      loads: loads,
+    },
+  ];
+
   return (
-    <Container className="book-container">
-      <Row>
-        <Col sm={11} md={6} className="booking-class">
-          {seatClass}
-        </Col>
-        <Col className="booking-seats">
-          <p>{seatsCount} Seats</p>
-          <p>{price}LKR</p>
-        </Col>
-        <Col className="booking-count">
-          <p>Available:{availableSeats}</p>
-          <p>Booked: {bookedSeats}</p>
-        </Col>
-        <Col>
-          <Row>
-            <Col className="ticket-count">
-              <span style={{ marginTop: "-30px" }}>{count}</span>
-            </Col>
-            <Col className="booking-ele">
-              <Row>
-                <Button
-                  variant="primary"
-                  className="btn-inc"
-                  onClick={increment}
-                >
-                  +
-                </Button>
-              </Row>
-              <Row>
-                <Button
-                  variant="primary"
-                  className="btn-dec"
-                  onClick={decrement}
-                >
-                  -
-                </Button>
-              </Row>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
-  );
-};
-
-const Schedule = () => {
-  return (
-    <main className="schedule">
-      <div className="schedule-background">
-        <div className="map-container">
-          <Container>
-            <Row>
-              <Col className="train-details" xs={3}>
-                <Col>
-                  <h4 className="body-paragraph">GALU KUMARI</h4>
-                  <p className="gray-paragraph">Colombo Commuter</p>
-                  <p className="gray-paragraph">Train No. 8057</p>
-                  <h5 className="body-paragraph">Daily</h5>
-                  <p className="gray-paragraph">Classes: 1st,2nd,3rd</p>
-                </Col>
-
-                <Col>
-                  <div className="vertical-line"></div>
-                </Col>
-              </Col>
-
-              <Col className="station-details" xs={2}>
-                <p className="station-paragraph">Station</p>
-                <p className="arrival-paragraph">Arrival</p>
-                <p className="departure-paragraph">Departure</p>
-                <p className="crowd-paragraph">Crowd</p>
-              </Col>
-              <Col xs={7} className="short-map">
-                <div className="lines">
-                  <div className="circle">
-                    <p className="next-station">Colombo Fort</p>
-                    <p className="arrival-time">06:30 am</p>
-                    <p className="departure-time">06:45 am</p>
-                  </div>
-                  <div className="circle">
-                    <p className="next-station">Mount Lavinia</p>
-                    <p className="arrival-time">07:15 am</p>
-                    <p className="departure-time">07:17 am</p>
-                  </div>
-                  <div className="circle">
-                    <p className="next-station">Ambalangoda</p>
-                    <p className="arrival-time">09:15 am</p>
-                    <p className="departure-time">09:17 am</p>
-                  </div>
-                  <div className="circle">
-                    <p className="next-station">Beliatta</p>
-                    <p className="arrival-time">11:15 am</p>
-                    <p className="departure-time"></p>
-                  </div>
-                </div>
-                <div className="crowd-line">
-                  <div className="crowd-rectangle one"></div>
-                  <div className="crowd-rectangle two"></div>
-                  <div className="crowd-rectangle three"></div>
-                  <div className="crowd-rectangle four"></div>
-                  <div className="crowd-rectangle five"></div>
-                  <div className="crowd-rectangle six"></div>
-                  <div className="crowd-rectangle seven"></div>
-                  <div className="crowd-rectangle eight"></div>
-                  <div className="crowd-rectangle nine"></div>
-                  <div className="crowd-rectangle ten"></div>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        <div className="text-container">
-          <h1>How many seats do you want to book?</h1>
-          <Form className="radio-switch">
-            <div className="d-flex justify-content-between align-items-center">
-              <label htmlFor="custom-switch">Return ticket?</label>
-              <Form.Check type="switch" id="custom-switch" />
-            </div>
-          </Form>
-        </div>
-        <div className="choose-class-container">
-          <div className="choose-class">
-            <ClassDetails
-              seatClass="First Class"
-              price="1850"
-              seatsCount="30"
-              availableSeats="20"
-              bookedSeats="10"
-            />
-          </div>
-          <div className="choose-class">
-            <ClassDetails
-              seatClass="Second Class"
-              price="950"
-              seatsCount="66"
-              availableSeats="40"
-              bookedSeats="26"
-            />
-          </div>
-          <div className="choose-class">
-            <ClassDetails
-              seatClass="Third Class"
-              price="550"
-              seatsCount="92"
-              availableSeats="58"
-              bookedSeats="34"
-            />
-          </div>
-        </div>
-        <Container className="bottom-row-conotainer">
-          <Col xs={6} className="d-flex align-items-center">
-            <div>
-              <div className="d-flex align-items-center">
-                <p className="ticket-count">2 First Class</p>
-                <p className="seat-para"> Seats selected</p>
+    <main className="booking">
+      <div className="booking-background">
+        <Container className="search-field">
+          <div className="search-form">
+            <div className="glass-container-extend">
+              <div className="dropdown-class">
+                <label className="dropdown-label">From</label>
+                <select onChange={handleFromStation}>
+                  <option disabled value="" selected>
+                    {fromStationNameAssign}
+                  </option>
+                  {data != undefined ? (
+                    data.map((station) => (
+                      <option
+                        key={station.StationID}
+                        value={station.StationName}
+                        data-station-id={station.StationID}
+                      >
+                        {station.StationName}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option>Loading</option>
+                    </>
+                  )}
+                </select>
               </div>
 
-              <div className="d-flex align-items-center">
-                <p className="ticket-price">3100 LKR</p>
-                <p className="cost-para">
-                  {" "}
-                  Costs can vary due to offers and other promotional matters
-                </p>
+              <div className="dropdown-class">
+                <label className="dropdown-label">To</label>
+                <select onChange={handleToStation}>
+                  <option disabled value="" selected>
+                    {toStationNameAssign}
+                  </option>
+                  {data != undefined ? (
+                    data.map((station) => (
+                      <option
+                        key={station.StationID}
+                        value={station.StationName}
+                        data-station-id={station.StationID}
+                      >
+                        {station.StationName}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option>Loading</option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              <div className="dropdown-class">
+                <label className="dropdown-label">Date</label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={handleDateChange}
+                  min={minDate}
+                />
+              </div>
+
+              <div className="search-btn">
+                <Button
+                  variant="primary"
+                  className="button-extend"
+                  onClick={fetchScheduleData}
+                >
+                  Search
+                </Button>
               </div>
             </div>
-          </Col>
-          <Col xs={6} className="d-flex align-items-center justify-content-end">
-            <LinkContainer to="/seatview">
-              <Button variant="primary" className="btn-book">
-                Continue
-              </Button>
-            </LinkContainer>
-          </Col>
+          </div>
         </Container>
+
+        {scheduleData && scheduleData.length > 0 ? (
+          <div>
+            {trainData.map((data, index) => (
+
+              <ScheduleCard 
+                onButtonClicked={handleButtonClicked}
+                key={index} 
+                {...data} />
+                
+            ))}
+          </div>
+        ) : (
+          <p className="no-train-text">
+            No train schedules available for this date. Please try another date.
+          </p>
+        )}
+        <div className="intensity-container">
+          <div className="crowd-intensity">
+            <div className="low-crowd">
+              <span className="low-arrow"></span>Low Crowd
+            </div>
+            <div className="high-crowd">
+              <span className="high-arrow"></span>High Crowd
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );
 };
 
-export default Schedule;
+export default NewBooking;

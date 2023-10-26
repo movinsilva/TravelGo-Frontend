@@ -1,60 +1,75 @@
 import { Container, Button } from "react-bootstrap";
 import "./HeroSection.scss";
-import { useGetScheduleMutation, useGetStationsQuery } from "../../slices/trainApiSlice";
-import { LinkContainer } from "react-router-bootstrap";
-import { useEffect, useState } from "react";
+import { useGetStationsQuery } from "../../slices/trainApiSlice";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   //getting stations data from api
   const { data, isLoading } = useGetStationsQuery();
-  const [ fromStation , setFromStation ] = useState("");
-  const [ toStation , setToStation ] = useState("");
-  const [ date , setDate ] = useState("");
-
-  const [schedule, { isLoading: isload}] = useGetScheduleMutation();
-  // const { date, setDate } = useState("");
-
+  const [fromStation, setFromStation] = useState("");
+  const [toStation, setToStation] = useState("");
+  const [date, setDate] = useState("");
+  const [fromStationName, setFromStationName] = useState("");
+  const [toStationName, setToStationName] = useState("");
+  
+  const navigate = useNavigate();
+  
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  const [minDate, setMinDate] = useState(getCurrentDate());
+  
   //function to handle from station
   const handleFromStation = (e) => {
-    setFromStation(e.target.value);
+    const selectedValue = e.target.value;
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const stationId = selectedOption.getAttribute('data-station-id');
+    setFromStation(stationId);
+    setFromStationName(selectedValue);
   };
+
   //function to handle to station
   const handleToStation = (e) => {
-    setToStation(e.target.value);
+    const selectedValue = e.target.value;
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const stationId = selectedOption.getAttribute('data-station-id');
+    setToStation(stationId);
+    setToStationName(selectedValue);
   };
   //function to handle date
   const handleDate = (e) => {
     setDate(e.target.value);
-  }
-  // useEffect(() => {
-  //   console.log("fromStation: " + date);
-  // }, [date]);
+  };
 
-  const handleSubmit = async () => {
-    console.log("fromStation: " + fromStation);
-    console.log("toStation: " + toStation);
-    console.log("date: " + date);
+  const handleSubmit = () => {
+    // Convert the data to an object
+    const searchData = {
+      fromStation,
+      toStation,
+      date,
+      fromStationName,
+      toStationName,
+      minDate,
 
-    try {
-     const res = await schedule({
-        sourceId: fromStation,
-        destinationId: toStation,
-        date: "Monday"
-      }).unwrap();
-      console.log(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+    };
+    // console.log("searchData: ", searchData);
+    // Use the history object to navigate to the next page and pass the data as query parameters
+    navigate("/schedule", { state: { searchData } });
+  };
 
   return (
     <section className="hero-section">
       <div className="hero-background"></div>
 
       <Container className="hero-content">
-        <div>
-          <p>Hello Travellers</p>
-          <h1>
+        <div className="traveler-div">
+          <p  className="traveler-para">Hello Travellers</p>
+          <h1 className="header-content">
             make your booking
             <br />
             experience easy!
@@ -66,10 +81,14 @@ const HeroSection = () => {
             <div className="dropdown-class">
               {/* Dropdown menu for selecting from station. */}
               <label className="dropdown-label">From</label>
-              <select onChange={(e) => handleFromStation(e)}>
+              <select onChange={handleFromStation}>
                 {data != undefined ? (
                   data.map((station) => (
-                    <option key={station.StationID} value={station.StationID}>
+                    <option 
+                      key={station.StationID} 
+                      value={station.StationName} 
+                      data-station-id={station.StationID}
+                    >
                       {station.StationName}
                     </option>
                   ))
@@ -82,13 +101,16 @@ const HeroSection = () => {
             </div>
 
             <div className="dropdown-class" id="to-select">
-            
-            {/* Dropdown menu for selecting to station. */}
+              {/* Dropdown menu for selecting to station. */}
               <label className="dropdown-label">To</label>
               <select onChange={handleToStation}>
                 {data != undefined ? (
                   data.map((station) => (
-                    <option key={station.StationID} value={station.StationID}>
+                    <option 
+                      key={station.StationID} 
+                      value={station.StationName} 
+                      data-station-id={station.StationID}
+                    >
                       {station.StationName}
                     </option>
                   ))
@@ -98,16 +120,25 @@ const HeroSection = () => {
                   </>
                 )}
               </select>
+              <input type="hidden" id="stationName" />
             </div>
             <div className="dropdown-class">
               <label className="dropdown-label">Date</label>
-              <input type="date" placeholder="Date" id="date-select"  onChange={handleDate}/>
+              <input
+                type="date"
+                placeholder="Date"
+                id="date-select"
+                onChange={handleDate}
+                min={minDate}
+              />
             </div>
-            <LinkContainer to="/booking">
-              <Button variant="primary" className="search-button-extend" onClick={handleSubmit}>
-                Search
-              </Button>
-            </LinkContainer>
+            <Button
+              variant="primary"
+              className="search-button-extend"
+              onClick={handleSubmit}
+            >
+              Search
+            </Button>
           </div>
         </div>
       </Container>
