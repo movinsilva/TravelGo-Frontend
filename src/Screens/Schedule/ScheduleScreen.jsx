@@ -1,11 +1,11 @@
-// eslint-disable-next-line no-unused-vars
 import React from 'react'
-import Schedule from './Schedule'
 
-const ScheduleScreen = () => {
+import Schedule from './Schedule';
+
+const BookingScreen = () => {
   return (
     <Schedule />
   )
 }
 
-export default ScheduleScreen;
+export default BookingScreen;

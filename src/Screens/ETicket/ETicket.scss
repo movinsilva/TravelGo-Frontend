@@ -4,20 +4,18 @@
     flex-direction: column;
     justify-content: space-between; 
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
 }
 .eticket-container{
     @include blue-backdrop;
     box-shadow: none;
     background-color: #b29e5e51;
-    margin:auto;
+    margin: 2% 0 2% 0;
+    padding: 0;
 }
 
 .eticket-heading{
     font-size: 1.4rem;
-    font-weight: weight(bold);
-    margin-bottom: 2px;   
+    font-weight: weight(bold);  
 }
 
 .heading-container{
@@ -41,8 +39,10 @@
     font-weight: weight(medium-s);
 }
 .container-header{
-    background-color: #05448b69;
+    background-color: #05448b75;
     border-radius: 10px 10px 0px 0px;
+    width: 100%;
+    margin-left: 0px;
 }
 .logo-inside{
     width: 60%;
@@ -85,3 +85,69 @@
 .main-row{
     margin:0;
 }
+.title-GO{
+    font-weight: weight(bold);
+    font-size: 3.3rem;
+}
+@media (max-width: 1000px) {
+   
+    .eticket-container {
+       aspect-ratio:9/4 ;
+      
+     }
+     .content-text,.content-text-data{
+        font-size: 90%;
+     }
+  
+    
+    /* Add similar rules for other elements that need scaling */
+  }
+  @media (max-width: 774px) {
+   
+    .eticket-container {
+       aspect-ratio:9/4 ;
+      
+     }
+     .content-text,.content-text-data{
+        font-size: 70%;
+     }
+     .seat-text-data{
+        padding: 0;
+     }
+     .heading{
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+     }
+    }
+     @media (max-width: 400px) {
+   
+        .eticket-container {
+           aspect-ratio:9/4 ;
+          
+         }
+         .content-text,.content-text-data{
+            font-size: 50%;
+           margin: 0%;
+           padding: 0%;
+         }
+         .header-text{
+            font-size: 100%;
+         }
+         .seat-text-data{
+            padding: 0;
+         }
+         .logo-inside{
+           width: 150%;
+         }
+         .qr{
+            width:150%;
+         }
+  
+    
+    /* Add similar rules for other elements that need scaling */
+  }
+ 
+
