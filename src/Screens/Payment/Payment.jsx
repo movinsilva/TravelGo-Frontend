@@ -1,12 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col, Row, Container } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
 import "./Payment.scss";
 import { FaRegCreditCard, FaCcMastercard, FaPaypal } from "react-icons/fa";
 import { RiVisaLine } from "react-icons/ri";
 import MyVerticallyCenteredModal from "./MyVerticallyCenteredModal";
+import { useNavigate, useLocation }  from "react-router-dom";
+
 
 const Payment = () => {
+  const [trainData, setTrainData] = useState(null);
+
+  const location = useLocation();
+  async function fetchData() {
+    const { state } = location;
+    const trainData = state && state.submitData;
+    if (trainData) {
+      setTrainData(trainData);
+    } else {
+      console.log("No train data available");
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [location]);
+
+
   const [formData, setFormData] = useState({
     cardNumber: "",
     cardHolderName: "",
@@ -22,7 +41,7 @@ const handleTerms = (e) => {
   setTerms(e)
    
   
-  console.log("terms",terms);
+  // console.log("terms",terms);
 }
 const handlePopup = () => {
   if (terms === false) {
@@ -33,15 +52,26 @@ const handlePopup = () => {
   }
   
 };
-//console.log("terms",terms);
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
-    console.log("f data",formData);
+    // console.log("f data",formData);
     setFormData({
       ...formData,
       [name]: newValue,
     });
+  };
+
+
+const navigate= useNavigate();
+
+const handleSubmit = () => {
+
+    const submitData = {
+      trainData,
+      terms,
+    };
+    navigate("/eticket", { state: { submitData } });
   };
   return (
     <main className="payment">
@@ -239,11 +269,15 @@ const handlePopup = () => {
             <p className="total-value mt-2"> 3632.50 LKR</p>
           </Col>
           <Col xs={12} md={4} className="btncontainer">
-            <LinkContainer to="/eticket">
-              <button className="btn btn-primary  btn-lg check-btn">
+            
+              <button className="btn btn-primary 
+               btn-lg check-btn"
+               disabled={!terms}
+               onClick={handleSubmit}
+              >
                 Confirm and Pay
               </button>
-            </LinkContainer>
+            
           </Col>
         </Row>
       </Container>
