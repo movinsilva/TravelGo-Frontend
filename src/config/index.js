@@ -6,7 +6,8 @@ const LOGIN = "/login";
 // API URLS
 
 // const BASE_API_URL = "http://16.171.10.136:5000/api";
-const BASE_API_URL = "http://localhost:5000/api";
+//const BASE_API_URL = "http://localhost:5000/api";
+const BASE_API_URL = "http://travelgo.ecodeit.com:5000/api";
 //const BASE_API_URL = "/api";
 
 
