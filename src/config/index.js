@@ -11,7 +11,6 @@ const BASE_API_URL = "http://travelgo.ecodeit.com:5000/api";
 //const BASE_API_URL = "/api";
 
 
-
 const LOGIN_API_URL = `${BASE_API_URL}/users/auth`;
 const REGISTER_API_URL = `${BASE_API_URL}/users/register`;
 const LOGOUT_API_URL = `${BASE_API_URL}/users/logout`
